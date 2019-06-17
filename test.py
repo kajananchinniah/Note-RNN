@@ -8,7 +8,6 @@ file_load_from = 'All_noteRNN.pt'
 top_k = 2
 useGPU = torch.cuda.is_available()
 midi_file = 'test.mid'
-instrument_str = 'piano'
 
 #If no GPU is avaliable, load using the CPU 
 if useGPU == False:
@@ -24,5 +23,4 @@ if useGPU == True:
     
 random_int = random.randint(0, len(model.notes) - 1) # getting a random integer from 0 to number of indexes
 output = RNN_network.sample(model, 1000, model.int2note[random_int], top_k, useGPU)
-#helper.convertAndSaveMidi(output, midi_file, instrument_str = instrument_str)
-helper.convertToInstrument(midi_file, instrument_str = 'violin')
+helper.convertAndSaveMidi(output, midi_file)

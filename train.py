@@ -14,7 +14,7 @@ batch_size = 128
 valid_percent = 0.3
 n_epochs = 200
 lr = 0.1 #mostly guess and checked 
-file_save_to = 'Classical_NoteRNN.pt'
+file_save_to = 'All_NoteRNN.pt'
 
 p = Path(data_dir)
 files = p.glob("*.mid")

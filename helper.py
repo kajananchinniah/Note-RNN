@@ -40,26 +40,7 @@ def getBatches(arr, batch_size, seq_length):
             y[:, :-1], y[:, -1] = x[:, 1:], arr[:, 0]
         yield x, y
         
-  
-def convertToInstrument(file_save_to, instrument_str = 'piano'):
-    if instrument_str.lower() == 'piano':
-        chosen_instrument = instrument.Piano()
-    elif instrument_str.lower() == 'violin':
-        chosen_instrument = instrument.Violin()
-    elif instrument_str.lower() == 'guitar':
-        chosen_instrument =  instrument.AcousticGuitar()
-    else:
-        print('Unrecognized instrument chosen!')
-        return None
-
-    s = converter.parse(file_save_to)
-    for i in s.recurse():
-        if 'Instrument' in i.classes: # Changing all instruments to the type chosen
-            i.activeSite.replace(i, chosen_instrument)
-    s.write('midi', file_save_to)
-
-
-def convertAndSaveMidi(predictions, file_save_to, instrument_str = 'piano'):
+def convertAndSaveMidi(predictions, file_save_to):
     output_notes = []
     offset = 0
     
@@ -85,4 +66,3 @@ def convertAndSaveMidi(predictions, file_save_to, instrument_str = 'piano'):
 
     midi_stream = stream.Stream(output_notes)
     midi_stream.write('midi', fp = file_save_to)
-    convertToInstrument(file_save_to, instrument_str)
