@@ -5,16 +5,16 @@ import torch
 import RNN_network
 
 #Constants
-data_dir = 'All/Classical/'
+data_dir = 'chrono_trigger/'
 useGPU =  torch.cuda.is_available()
 n_hidden = 512
-n_layers = 3
-seq_length = 100
-batch_size = 128
+n_layers = 5
+seq_length = 50
+batch_size = 32
 valid_percent = 0.3
 n_epochs = 200
-lr = 0.1 #mostly guess and checked 
-file_save_to = 'All_NoteRNN.pt'
+lr = 0.05 #mostly guess and checked 
+file_save_to = 'chronotrigger_NoteRNN.pt'
 
 p = Path(data_dir)
 files = p.glob("*.mid")

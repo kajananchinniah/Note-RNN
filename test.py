@@ -4,7 +4,7 @@ import random
 import RNN_network
 import helper
 
-file_load_from = 'All_noteRNN.pt'
+file_load_from = 'chronotrigger_noteRNN.pt'
 top_k = 2
 useGPU = torch.cuda.is_available()
 midi_file = 'test.mid'
@@ -22,5 +22,5 @@ if useGPU == True:
     model = model.cuda()
     
 random_int = random.randint(0, len(model.notes) - 1) # getting a random integer from 0 to number of indexes
-output = RNN_network.sample(model, 1000, model.int2note[random_int], top_k, useGPU)
+output = RNN_network.sample(model, 500, model.int2note[random_int], top_k, useGPU)
 helper.convertAndSaveMidi(output, midi_file)
