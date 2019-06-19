@@ -1,9 +1,10 @@
 # Note-RNN
 
-Currently, this doesn't work very well. I think the problem lies with my network architecture as it's far too simple, but my model also doesn't seem to be training well either (converges very quickly).
+Currently, this doesn't work very well. I think the problem lies with my network architecture as it's far too simple, but my model also doesn't seem to be training well either.
 
 My future plans are:
-1) Try to purposely get my network to overfit. Currently, I'd say that my network isn't training well enough from the data.
+1) Try to purposely get my network to overfit. Currently, I'd say that my network isn't training well enough from the data. This is evident from the sound produced. (It's not very good)
+
 2) Research other, more complex network architectures to try and get better results (e.g. encoder decoder)
 
 RNN_network.py contains the class definition of the RNN, a function to train the RNN, a function to predict the next note in the sequence, and a function to generate x amounts of notes.
