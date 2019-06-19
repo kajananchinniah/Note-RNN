@@ -12,7 +12,7 @@ helper.py contains helper functions used (one hot encoding, getting the batches,
 
 The folder model files contains the models I obtained from training for epochs 100 - 400, and a sample midi output for each model saved. 
 
-Some changes I made from my last iteration that seemed to improve my training:
+Some changes I made from my last iteration that seemed to improve my training & results:
 * Increase my fully connected layers from 1 to 2 
 * Changed my optimizer from SGD to Adam. Adam seemed to have given me the best results compared to other optimization algorithms I used (I tried Adadelta, rmsprop and Adagrad)
 * Used more data (my chrono model now uses the soundtrack from chrono trigger and chrono cross, as for my all model, it uses both chrono games soundtracks, the soundtrack from the legend of zelda ocarina of time, and pieces composed by some classical musicians.  The all data was mostly just random things).
