@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import helper
 import numpy as np
+import torch.nn.functional as F
 
 class noteRNN(nn.Module):
     def __init__(self, tokens, n_hidden, n_layers, dropout_prob = 0.5, lr = 0.01):
@@ -12,20 +13,24 @@ class noteRNN(nn.Module):
         self.n_hidden = n_hidden
         self.lr = lr
         
+        self.fc_hidden_size_1 = int((len(tokens) + n_hidden) / 2)
         self.notes = tokens
         self.int2note = dict(enumerate(self.notes))
         self.note2int = {note : i for i, note in self.int2note.items()}
         
         self.LSTM = nn.LSTM(len(self.notes), self.n_hidden, self.n_layers, dropout = self.dropout_prob, batch_first = True)
         self.dropout = nn.Dropout(dropout_prob)
-        self.fc = nn.Linear(n_hidden, len(tokens))
+        self.fc1 = nn.Linear(n_hidden, self.fc_hidden_size_1)
+        self.fc2 = nn.Linear(self.fc_hidden_size_1, len(self.notes))
         self.logsoftmax = nn.LogSoftmax(dim = 1)
         
     def forward(self, x, hidden):
         out, hidden = self.LSTM(x, hidden)
         out = self.dropout(out)
         out = out.contiguous().view(-1, self.n_hidden)
-        out = self.fc(out)
+        out = self.fc1(out)
+        out = self.dropout(out)
+        out = self.fc2(out)
         return out, hidden
     
     def init_hidden(self, batch_size, useGPU):
@@ -40,9 +45,9 @@ class noteRNN(nn.Module):
         
         return hidden
                     
-def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size = 32, seq_length = 100, lr = 0.01, clip = 5, useGPU = False, saveMinTrainLoss = True):
+def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size = 32, seq_length = 100, lr = 0.01, clip = 5, useGPU = False, save_every = 100):
     model.train()
-    optimizer = torch.optim.SGD(model.parameters(), lr = lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr = lr)
     criterion = nn.CrossEntropyLoss()
     
     if (useGPU == True):
@@ -50,7 +55,7 @@ def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size 
     
     n_notes = len(model.notes)
     min_valid_loss = 9999999 #big random big number
-    for e in range(0, epochs, 1):
+    for e in range(1, epochs+1, 1):
         hid = model.init_hidden(batch_size, useGPU)
         train_loss_tot = 0
         train_count = 0
@@ -72,6 +77,7 @@ def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size 
             optimizer.step()
             train_loss_tot = train_loss_tot + loss.item()
         
+        
         else:
             valid_loss_tot = 0
             valid_count = 0
@@ -91,7 +97,7 @@ def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size 
                     log_prob, valid_hid = model(inputs, valid_hid)
                     valid_loss = criterion(log_prob, targets.view(batch_size * seq_length).long())
                     valid_loss_tot = valid_loss_tot + valid_loss.item()
-                                        
+                                       
                 avg_train_loss = train_loss_tot / train_count 
                 avg_valid_loss = valid_loss_tot / valid_count
                 model.train()
@@ -99,23 +105,16 @@ def train(model, train_data, valid_data,  file_save_to, epochs = 20, batch_size 
                 print("Train Loss : ", avg_train_loss)
                 print("Valid Loss : ", avg_valid_loss)
                 
-                if (avg_valid_loss <= min_valid_loss) and saveMinTrainLoss == False:
+                if (e % save_every == 0):
                     print("Saving model...")
+                    f = str(e) + "_" + file_save_to
                     checkpoint = {'n_hidden' : model.n_hidden,
                                   'n_layers' : model.n_layers,
                                   'state_dict' : model.state_dict(),
                                   'tokens' : model.notes }
-                    torch.save(checkpoint, file_save_to)
+                    torch.save(checkpoint, f)
                     min_valid_loss = avg_valid_loss
-        
-    if saveMinTrainLoss == True:
-        print("Saving model...")
-        checkpoint = {'n_hidden' : model.n_hidden,
-                      'n_layers' : model.n_layers,
-                      'state_dict' : model.state_dict(),
-                      'tokens' : model.notes }
-        torch.save(checkpoint, file_save_to)
-        
+                
 def predict(model, note, hid = None, top_k = None, useGPU = False):
     x = np.array([[model.note2int[note]]])
     inputs = helper.oneHotEncode(x, len(model.notes))
@@ -125,7 +124,8 @@ def predict(model, note, hid = None, top_k = None, useGPU = False):
         inputs = inputs.cuda()
        
     hid = tuple([each.data for each in hid])
-    prob, hid = model(inputs, hid)
+    out, hid = model(inputs, hid)
+    prob = F.log_softmax(out, dim = 1).data
     if (useGPU == True):
         prob = prob.cpu()
             
@@ -134,7 +134,7 @@ def predict(model, note, hid = None, top_k = None, useGPU = False):
     else:
         prob, top_note = prob.topk(top_k)
         top_note = top_note.numpy().squeeze()
-    prob = prob.detach().numpy().squeeze()
+    prob = prob.detach().numpy().squeeze()    
     note = np.random.choice(top_note, p = prob/prob.sum())
     
     return model.int2note[note], hid

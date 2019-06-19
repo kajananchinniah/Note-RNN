@@ -5,16 +5,16 @@ import torch
 import RNN_network
 
 #Constants
-data_dir = 'chrono_trigger/'
+data_dir = 'All/'
 useGPU =  torch.cuda.is_available()
 n_hidden = 512
-n_layers = 5
-seq_length = 50
-batch_size = 32
-valid_percent = 0.3
-n_epochs = 200
-lr = 0.05 #mostly guess and checked 
-file_save_to = 'chronotrigger_NoteRNN.pt'
+n_layers = 3
+seq_length = 100
+batch_size = 128
+valid_percent = 0.1
+n_epochs = 400
+lr = 0.001 #mostly guess and checked 
+file_save_to = 'all_NoteRNN.pt'
 
 p = Path(data_dir)
 files = p.glob("*.mid")
@@ -28,4 +28,4 @@ valid_index = int(len(encoded) * (1 - valid_percent))
 encoded_train, encoded_valid = encoded[:valid_index], encoded[valid_index:]
 model = RNN_network.noteRNN(pitchnames, n_hidden, n_layers, lr = lr)
 print(model)
-RNN_network.train(model, encoded_train, encoded_valid, file_save_to, epochs = n_epochs, batch_size = batch_size, seq_length = seq_length, lr = lr, useGPU = useGPU, saveMinTrainLoss = True)
+RNN_network.train(model, encoded_train, encoded_valid, file_save_to, epochs = n_epochs, batch_size = batch_size, seq_length = seq_length, lr = lr, useGPU = useGPU)

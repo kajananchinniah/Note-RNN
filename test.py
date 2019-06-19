@@ -4,10 +4,10 @@ import random
 import RNN_network
 import helper
 
-file_load_from = 'chronotrigger_noteRNN.pt'
-top_k = 2
+file_load_from = '400_all_NoteRNN.pt'
+top_k = 10
 useGPU = torch.cuda.is_available()
-midi_file = 'test.mid'
+midi_file = '400_all.mid'
 
 #If no GPU is avaliable, load using the CPU 
 if useGPU == False:

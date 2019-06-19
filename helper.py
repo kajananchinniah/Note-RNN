@@ -4,7 +4,11 @@ import numpy as np
 def processData(data):
     notes = []
     for file in data:
-        midi = converter.parse(file)
+        try:
+            midi = converter.parse(file)
+        except:
+            print(file)
+            continue
         notes_to_parse = None
         parts = instrument.partitionByInstrument(midi)
         
